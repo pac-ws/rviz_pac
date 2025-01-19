@@ -1,0 +1,5 @@
+<library path="main_panel">
+  <class type="rviz_pac_panel::MainPanel" base_class_type="rviz_common::Panel">
+    <description>Rviz panel for pac</description>
+  </class>
+</library>
