@@ -40,8 +40,12 @@
 
 namespace rviz_pac_panel {
 MainPanel::MainPanel(QWidget* parent) : Panel(parent) {
-  // Create a label and a button, displayed vertically (the V in VBox means
-  // vertical)
+
+  rmw_qos_profile_t qos_profile = rmw_qos_profile_sensor_data;
+  qos_ = rclcpp::QoS(
+      rclcpp::QoSInitialization(qos_profile.history, qos_profile.depth)
+      qos_profile);
+
   const auto layout = new QVBoxLayout(this);
   label_ = new QLabel("PAC status: 2");
   label_->setStyleSheet("color: red; font-weight: bold;");
@@ -91,7 +95,7 @@ void MainPanel::onInitialize() {
   // subscriptions/publishers (as per normal rclcpp code)
   rclcpp::Node::SharedPtr node = node_ptr_->get_raw_node();
   publisher_ =
-      node->create_publisher<std_msgs::msg::Int32>("/pac_gcs/status_pac", 10);
+      node->create_publisher<std_msgs::msg::Int32>("/pac_gcs/status_pac", qos_);
   timer_ = node->create_wall_timer(
       std::chrono::milliseconds(500), [this]() -> void {
         auto msg = std_msgs::msg::Int32();

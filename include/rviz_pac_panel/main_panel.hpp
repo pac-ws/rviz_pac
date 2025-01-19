@@ -40,6 +40,7 @@
 #include <QRadioButton>
 #include <rviz_common/panel.hpp>
 #include <rviz_common/ros_integration/ros_node_abstraction_iface.hpp>
+#include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/int32.hpp>
 
 namespace rviz_pac_panel {
@@ -64,6 +65,7 @@ class MainPanel : public rviz_common::Panel {
 
  private:
   int pac_status_ = 2;
+  rclcpp::QoS qos_;
   /* private Q_SLOTS: */
   /* void buttonActivated(); */
   /* int getRadioButtonStatus(); */
