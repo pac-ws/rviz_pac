@@ -39,11 +39,11 @@
 #include <rviz_pac_panel/main_panel.hpp>
 
 namespace rviz_pac_panel {
-MainPanel::MainPanel(QWidget* parent) : Panel(parent) {
+MainPanel::MainPanel(QWidget* parent) : Panel(parent), qos_(1) {
 
   rmw_qos_profile_t qos_profile = rmw_qos_profile_sensor_data;
   qos_ = rclcpp::QoS(
-      rclcpp::QoSInitialization(qos_profile.history, qos_profile.depth)
+      rclcpp::QoSInitialization(qos_profile.history, qos_profile.depth),
       qos_profile);
 
   const auto layout = new QVBoxLayout(this);
