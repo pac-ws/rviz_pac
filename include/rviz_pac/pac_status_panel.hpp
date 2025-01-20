@@ -32,8 +32,8 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef RVIZ_PAC_PANEL__MAIN_PANEL_HPP_
-#define RVIZ_PAC_PANEL__MAIN_PANEL_HPP_
+#ifndef RVIZ_PAC__MAIN_PANEL_HPP_
+#define RVIZ_PAC__MAIN_PANEL_HPP_
 
 #include <QLabel>
 #include <QPushButton>
@@ -43,12 +43,12 @@
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/int32.hpp>
 
-namespace rviz_pac_panel {
-class MainPanel : public rviz_common::Panel {
+namespace rviz_pac {
+class PACStatusPanel : public rviz_common::Panel {
   Q_OBJECT
  public:
-  explicit MainPanel(QWidget* parent = 0);
-  ~MainPanel() override;
+  explicit PACStatusPanel(QWidget* parent = 0);
+  ~PACStatusPanel() override;
 
   void onInitialize() override;
 
@@ -71,6 +71,6 @@ class MainPanel : public rviz_common::Panel {
   /* int getRadioButtonStatus(); */
 };
 
-}  // namespace rviz_pac_panel
+}  // namespace rviz_pac
 
-#endif  // RVIZ_PAC_PANEL__MAIN_PANEL_HPP_
+#endif  // RVIZ_PAC__MAIN_PANEL_HPP_

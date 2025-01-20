@@ -1,0 +1,10 @@
+<library path="pac_status_panel">
+  <class type="rviz_pac::PACStatusPanel" base_class_type="rviz_common::Panel">
+    <description>Rviz panel for pac</description>
+  </class>
+</library>
+<library path="xy_teleop_panel">
+  <class type="rviz_pac::XYTeleopPanel" base_class_type="rviz_common::Panel">
+    <description>A panel widget to drive holonomic robot.</description>
+  </class>
+</library>

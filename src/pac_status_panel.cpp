@@ -36,10 +36,10 @@
 
 #include <QVBoxLayout>
 #include <rviz_common/display_context.hpp>
-#include <rviz_pac_panel/main_panel.hpp>
+#include <rviz_pac/pac_status_panel.hpp>
 
-namespace rviz_pac_panel {
-MainPanel::MainPanel(QWidget* parent) : Panel(parent), qos_(1) {
+namespace rviz_pac {
+PACStatusPanel::PACStatusPanel(QWidget* parent) : Panel(parent), qos_(1) {
 
   rmw_qos_profile_t qos_profile = rmw_qos_profile_sensor_data;
   qos_ = rclcpp::QoS(
@@ -84,9 +84,9 @@ MainPanel::MainPanel(QWidget* parent) : Panel(parent), qos_(1) {
   });
 }
 
-MainPanel::~MainPanel() = default;
+PACStatusPanel::~PACStatusPanel() = default;
 
-void MainPanel::onInitialize() {
+void PACStatusPanel::onInitialize() {
   // Access the abstract ROS Node and
   // in the process lock it for exclusive use until the method is done.
   node_ptr_ = getDisplayContext()->getRosNodeAbstraction().lock();
@@ -104,7 +104,7 @@ void MainPanel::onInitialize() {
       });
 }
 
-}  // namespace rviz_pac_panel
+}  // namespace rviz_pac
 
 #include <pluginlib/class_list_macros.hpp>
-PLUGINLIB_EXPORT_CLASS(rviz_pac_panel::MainPanel, rviz_common::Panel)
+PLUGINLIB_EXPORT_CLASS(rviz_pac::PACStatusPanel, rviz_common::Panel)
