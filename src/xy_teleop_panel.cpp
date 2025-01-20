@@ -198,7 +198,7 @@ void XYTeleopPanel::setTopic(const QString& new_topic) {
       // topic name.
       velocity_publisher_ =
           velocity_node_->create_publisher<geometry_msgs::msg::TwistStamped>(
-              output_topic_.toStdString(), 1);
+              output_topic_.toStdString(), qos_);
     }
     // rviz_common::Panel defines the configChanged() signal.  Emitting it
     // tells RViz that something in this panel has changed that will
