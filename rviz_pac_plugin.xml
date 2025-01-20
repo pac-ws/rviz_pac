@@ -8,3 +8,9 @@
     <description>A panel widget to drive holonomic robot.</description>
   </class>
 </library>
+<library path="tf_display">
+  <class type="rviz_pac::displays::TFDisplay" base_class_type="rviz_common::Display">
+    <description>A panel widget to drive holonomic robot.</description>
+    <message_type>tf2_msgs/msg/TFMessage</message_type>
+  </class>
+</library>
