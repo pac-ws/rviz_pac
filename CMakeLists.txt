@@ -47,25 +47,28 @@ ament_target_dependencies(xy_teleop_panel
   rclcpp
 )
 install(TARGETS pac_status_panel
-        EXPORT export_rviz_pac_pac_status_panel
-        ARCHIVE DESTINATION lib
-        LIBRARY DESTINATION lib
-        RUNTIME DESTINATION bin
+  EXPORT export_rviz_pac_pac_status_panel
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
 )
 install(TARGETS xy_teleop_panel
-        EXPORT export_rviz_pac_teleop_panel
-        ARCHIVE DESTINATION lib
-        LIBRARY DESTINATION lib
-        RUNTIME DESTINATION bin
+  EXPORT export_rviz_pac_teleop_panel
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
 )
 install(DIRECTORY include/
-        DESTINATION include
+  DESTINATION include
+)
+install(DIRECTORY resource
+  DESTINATION share/${PROJECT_NAME}
 )
 install(FILES rviz_pac_plugin.xml
-        DESTINATION share/${PROJECT_NAME}
+  DESTINATION share/${PROJECT_NAME}
 )
 install(FILES icons/classes/PACStatusPanel.png
-        DESTINATION share/${PROJECT_NAME}/icons/classes
+  DESTINATION share/${PROJECT_NAME}/icons/classes
 )
 ament_export_include_directories(include)
 ament_export_targets(export_rviz_pac_pac_status_panel)
