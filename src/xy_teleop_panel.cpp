@@ -85,7 +85,7 @@ XYTeleopPanel::XYTeleopPanel(QWidget* parent)
   // QLabel and a QLineEdit in a QHBoxLayout.
   const auto topic_layout = new QHBoxLayout;
   topic_layout->addWidget(enable_checkbox_);
-  topic_layout->addWidget(new QLabel("Output Topic:"));
+  topic_layout->addWidget(new QLabel("Topic:"));
   output_topic_editor_ = new QLineEdit;
   topic_layout->addWidget(output_topic_editor_);
 
