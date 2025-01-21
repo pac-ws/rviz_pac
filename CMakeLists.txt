@@ -52,7 +52,7 @@ ament_target_dependencies(xy_teleop_panel
   rclcpp
 )
 
-qt5_wrap_cpp(MOC_FILES_TF include/rviz_pac/tf/frame_info.hpp include/rviz_pac/tf/tf_display.hpp include/rviz_pac/tf/frame_selection_handler.hpp)
+qt5_wrap_cpp(MOC_FILES_TF include/rviz_pac/tf/frame_info.hpp include/rviz_pac/tf/tf_display.hpp)
 add_library(tf_display SHARED src/tf/frame_info.cpp src/tf/tf_display.cpp src/tf/frame_selection_handler.cpp ${MOC_FILES_TF})
 target_include_directories(tf_display PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
