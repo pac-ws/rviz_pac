@@ -132,7 +132,7 @@ TFDisplay::TFDisplay()
 
   frame_timeout_property_ = new FloatProperty(
     "Frame Timeout",
-    15,
+    5,
     "The length of time, in seconds, before a frame that has not been updated is considered"
     " \"dead\".  For 1/3 of this time the frame will appear correct, for the second 1/3rd it will"
     " fade to gray, and then it will fade out completely.",
@@ -334,7 +334,7 @@ void TFDisplay::updateFrames()
     current_frames.insert(info);
   }
 
-  deleteObsoleteFrames(current_frames);
+  /* deleteObsoleteFrames(current_frames); */
 
   context_->queueRender();
 }
@@ -374,6 +374,7 @@ FrameInfo * TFDisplay::createFrame(const std::string & frame)
   info->selection_handler_->addTrackedObjects(info->axes_->getSceneNode());
 
   info->name_text_ = new MovableText(frame, "Liberation Sans", 0.1f);
+  info->name_text_->setLocalTranslation(Ogre::Vector3(0, -3, 0));
   info->name_text_->setTextAlignment(MovableText::H_CENTER, MovableText::V_BELOW);
   info->name_node_ = names_node_->createChildSceneNode();
   info->name_node_->attachObject(info->name_text_);
@@ -464,10 +465,10 @@ void TFDisplay::updateFrame(FrameInfo * frame)
 
     double age = tf2::durationToSec(tf2::get_now() - frame->last_update_);
     double frame_timeout = frame_timeout_property_->getFloat();
-    if (age > frame_timeout) {
-      frame->setVisible(false);
-      return;
-    }
+    /* if (age > frame_timeout) { */
+    /*   frame->setVisible(false); */
+    /*   return; */
+    /* } */
     frame->updateColorForAge(age, frame_timeout);
 
     setStatusStd(StatusProperty::Ok, frame->name_, "Transform OK");
