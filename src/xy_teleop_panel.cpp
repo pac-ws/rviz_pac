@@ -199,6 +199,18 @@ void XYTeleopPanel::setTopic(const QString& new_topic) {
       velocity_publisher_ =
           velocity_node_->create_publisher<geometry_msgs::msg::TwistStamped>(
               output_topic_.toStdString(), qos_);
+      // count the number of '/' in the topic name
+      // if there are more than 1, the first one is the namespace
+      // extract the namespace
+      int count = output_topic_.count('/');
+      if (count > 1) {
+        int pos = output_topic_.indexOf('/', 1);
+        namespace_ = output_topic_.left(pos).toStdString();
+        frame_id_ = namespace_;
+      } else {
+        namespace_ = "";
+        frame_id_ = "map";
+      }
     }
     // rviz_common::Panel defines the configChanged() signal.  Emitting it
     // tells RViz that something in this panel has changed that will
@@ -219,7 +231,7 @@ void XYTeleopPanel::sendVel() {
   if (enabled_ == true && rclcpp::ok() && velocity_publisher_ != NULL) {
     geometry_msgs::msg::TwistStamped msg;
     msg.header.stamp = velocity_node_->now();
-    msg.header.frame_id = "map";
+    msg.header.frame_id = frame_id_;
     msg.twist.linear.x = vel_x_;
     msg.twist.linear.y = vel_y_;
     msg.twist.linear.z = 0;

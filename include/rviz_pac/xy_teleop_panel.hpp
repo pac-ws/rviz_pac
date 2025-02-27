@@ -123,6 +123,8 @@ class XYTeleopPanel : public rviz_common::Panel {
 
   // The current name of the output topic.
   QString output_topic_;
+  std::string namespace_;
+  std::string frame_id_ = "map";
 
   // The ROS node and publisher for the command velocity.
   std::shared_ptr<rviz_common::ros_integration::RosNodeAbstractionIface>
