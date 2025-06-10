@@ -12,6 +12,7 @@
   <depend>rviz_common</depend>
   <depend>geometry_msgs</depend>
   <depend>rviz_rendering</depend>
+  <depend>async_pac_gnn_interfaces</depend>
 
   <export>
     <build_type>ament_cmake</build_type>

@@ -23,6 +23,7 @@ find_package(tf2 REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(visualization_msgs REQUIRED)
+find_package(async_pac_gnn_interfaces REQUIRED)
 
 set(CMAKE_AUTOMOC ON)
 qt5_wrap_cpp(MOC_FILES_PAC_STATUS_PANEL include/rviz_pac/pac_status_panel.hpp)
@@ -36,6 +37,7 @@ target_include_directories(pac_status_panel PUBLIC
 ament_target_dependencies(pac_status_panel
   pluginlib
   rviz_common
+  async_pac_gnn_interfaces
 )
 
 qt5_wrap_cpp(MOC_FILES_TELEOP_PANEL include/rviz_pac/xy_drive_widget.hpp include/rviz_pac/xy_teleop_panel.hpp)

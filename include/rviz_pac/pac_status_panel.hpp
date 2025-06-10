@@ -36,11 +36,16 @@
 #define RVIZ_PAC__MAIN_PANEL_HPP_
 
 #include <QLabel>
+#include <QLineEdit>
 #include <QPushButton>
 #include <QRadioButton>
+#include <QTextEdit>
+#include <async_pac_gnn_interfaces/srv/update_world_file.hpp>
+#include <async_pac_gnn_interfaces/srv/world_file.hpp>
+#include <rclcpp/executors/single_threaded_executor.hpp>
+#include <rclcpp/rclcpp.hpp>
 #include <rviz_common/panel.hpp>
 #include <rviz_common/ros_integration/ros_node_abstraction_iface.hpp>
-#include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/int32.hpp>
 
 namespace rviz_pac {
@@ -51,6 +56,8 @@ class PACStatusPanel : public rviz_common::Panel {
   ~PACStatusPanel() override;
 
   void onInitialize() override;
+  void GetWorldFile();
+  void UpdateWorldFile();
 
  protected:
   std::shared_ptr<rviz_common::ros_integration::RosNodeAbstractionIface>
@@ -62,10 +69,22 @@ class PACStatusPanel : public rviz_common::Panel {
   QRadioButton* radio_button_ready_;
   QRadioButton* radio_button_pause_;
   QRadioButton* radio_button_stop_;
+  // Add a button to reset world, a text field to enter IDF file name, and a
+  // read-only text field to display output messages
+  QPushButton* reset_button_;
+  QLineEdit* idf_file_input_;
+  QString idf_file_name_;
+  QTextEdit* output_text_;
+
+  /* rclcpp::executors::SingleThreadedExecutor executor_; */
 
  private:
   int pac_status_ = 2;
   rclcpp::QoS qos_;
+  rclcpp::Client<async_pac_gnn_interfaces::srv::UpdateWorldFile>::SharedPtr
+      update_world_client_;
+  rclcpp::Client<async_pac_gnn_interfaces::srv::WorldFile>::SharedPtr
+      world_file_client_;
   /* private Q_SLOTS: */
   /* void buttonActivated(); */
   /* int getRadioButtonStatus(); */
