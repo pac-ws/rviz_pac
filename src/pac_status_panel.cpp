@@ -129,7 +129,7 @@ void PACStatusPanel::onInitialize() {
         msg.data = pac_status_;
         publisher_->publish(msg);
       });
-  // GetWorldFile();
+  GetWorldFile();
 }
 
 void PACStatusPanel::UpdateWorldFile() {
