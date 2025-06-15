@@ -133,39 +133,85 @@ void PACStatusPanel::onInitialize() {
 }
 
 void PACStatusPanel::UpdateWorldFile() {
-  using async_pac_gnn_interfaces::srv::UpdateWorldFile;
-  using ServiceResponseFuture =
-          rclcpp::Client<UpdateWorldFile>::SharedFutureWithRequest;
+  using UpdateWorldFileAction = async_pac_gnn_interfaces::action::UpdateWorldFile;
+  using GoalHandleUpdateWorldFile = rclcpp_action::ClientGoalHandle<UpdateWorldFileAction>;
+  
   rclcpp::Node::SharedPtr node = node_ptr_->get_raw_node();
-  update_world_client_ =
-      node->create_client<UpdateWorldFile>(
-          "update_world");
-  while (!update_world_client_->wait_for_service(1s)) {
-    if (!rclcpp::ok()) {
-      rclcpp::shutdown();
-      return;
-    }
+  
+  // Create action client
+  update_world_action_client_ = rclcpp_action::create_client<UpdateWorldFileAction>(
+      node, "update_world");
+      
+  // Wait for action server
+  if (!update_world_action_client_->wait_for_action_server(std::chrono::seconds(1))) {
+    output_text_->append("<span style='color: red;'>UpdateWorld action server not available</span>");
+    return;
   }
-  auto update_world_file_cb =
-    [output = output_text_](ServiceResponseFuture future) {
-      auto request_response_pair = future.get();
-      if (request_response_pair.second->success) {
-        output->append(
-            "World file updated successfully");
+  
+  // Create goal
+  auto goal_msg = UpdateWorldFileAction::Goal();
+  goal_msg.file = idf_file_name_.toStdString();
+  goal_msg.namespaces = namespaces_;
+  
+  output_text_->clear();
+  output_text_->append("Sending update world request for: " + idf_file_name_);
+  
+  // Set up goal options with callbacks
+  auto send_goal_options = rclcpp_action::Client<UpdateWorldFileAction>::SendGoalOptions();
+  
+  // Goal response callback
+  send_goal_options.goal_response_callback =
+    [output = output_text_](const GoalHandleUpdateWorldFile::SharedPtr& goal_handle) {
+      if (!goal_handle) {
+        output->append("<span style='color: red;'>Goal was rejected by server</span>");
       } else {
-        std::string output_str = "<span style='color: red;'>";
-        output_str += request_response_pair.second->message;
-        output_str += "Failed to update world file";
-        output_str += "</span>";
-        output->append(QString::fromStdString(output_str));
+        output->append("Goal accepted by server, processing...");
       }
     };
-  auto request =
-      std::make_shared<UpdateWorldFile::Request>();
-  request->file = idf_file_name_.toStdString();
-  request->namespaces = namespaces_;
-  update_world_client_->async_send_request(
-      request, std::move(update_world_file_cb));
+    
+  // Feedback callback
+  send_goal_options.feedback_callback =
+    [output = output_text_](
+      GoalHandleUpdateWorldFile::SharedPtr,
+      const std::shared_ptr<const UpdateWorldFileAction::Feedback> feedback) {
+      QString progress = QString("%1/%2")
+                         .arg(feedback->robots_completed)
+                         .arg(feedback->robots_total);
+      output->append(progress);
+      
+      if (!feedback->message.empty()) {
+        output->append(QString::fromStdString(feedback->message));
+      }
+    };
+    
+  // Result callback
+  send_goal_options.result_callback =
+    [output = output_text_](const GoalHandleUpdateWorldFile::WrappedResult& result) {
+      switch (result.code) {
+        case rclcpp_action::ResultCode::SUCCEEDED:
+          if (result.result->success) {
+            output->append("<span style='color: green;'>Complete</span>");
+          } else {
+            output->append("<span style='color: red;'>Failed</span>");
+            if (!result.result->message.empty()) {
+              output->append(QString::fromStdString(result.result->message));
+            }
+          }
+          break;
+        case rclcpp_action::ResultCode::ABORTED:
+          output->append("<span style='color: red;'>Action was aborted</span>");
+          break;
+        case rclcpp_action::ResultCode::CANCELED:
+          output->append("<span style='color: red;'>Action was canceled</span>");
+          break;
+        default:
+          output->append("<span style='color: red;'>Unknown result code</span>");
+          break;
+      }
+    };
+  
+  // Send goal
+  update_world_action_client_->async_send_goal(goal_msg, send_goal_options);
 }
 
 void PACStatusPanel::GetSystemInfo() {

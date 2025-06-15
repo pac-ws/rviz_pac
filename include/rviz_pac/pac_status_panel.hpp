@@ -40,10 +40,11 @@
 #include <QPushButton>
 #include <QRadioButton>
 #include <QTextEdit>
-#include <async_pac_gnn_interfaces/srv/update_world_file.hpp>
+#include <async_pac_gnn_interfaces/action/update_world_file.hpp>
 #include <async_pac_gnn_interfaces/srv/system_info.hpp>
 #include <rclcpp/executors/single_threaded_executor.hpp>
 #include <rclcpp/rclcpp.hpp>
+#include <rclcpp_action/rclcpp_action.hpp>
 #include <rviz_common/panel.hpp>
 #include <rviz_common/ros_integration/ros_node_abstraction_iface.hpp>
 #include <std_msgs/msg/int32.hpp>
@@ -76,19 +77,15 @@ class PACStatusPanel : public rviz_common::Panel {
   QString idf_file_name_;
   QTextEdit* output_text_;
 
-  /* rclcpp::executors::SingleThreadedExecutor executor_; */
 
  private:
   int pac_status_ = 2;
   std::vector<std::string> namespaces_;
   rclcpp::QoS qos_;
-  rclcpp::Client<async_pac_gnn_interfaces::srv::UpdateWorldFile>::SharedPtr
-      update_world_client_;
+  rclcpp_action::Client<async_pac_gnn_interfaces::action::UpdateWorldFile>::SharedPtr
+      update_world_action_client_;
   rclcpp::Client<async_pac_gnn_interfaces::srv::SystemInfo>::SharedPtr
       system_info_client_;
-  /* private Q_SLOTS: */
-  /* void buttonActivated(); */
-  /* int getRadioButtonStatus(); */
 };
 
 }  // namespace rviz_pac
