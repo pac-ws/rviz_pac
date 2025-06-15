@@ -129,7 +129,7 @@ void PACStatusPanel::onInitialize() {
         msg.data = pac_status_;
         publisher_->publish(msg);
       });
-  GetWorldFile();
+  GetSystemInfo();
 }
 
 void PACStatusPanel::UpdateWorldFile() {
@@ -139,7 +139,7 @@ void PACStatusPanel::UpdateWorldFile() {
   rclcpp::Node::SharedPtr node = node_ptr_->get_raw_node();
   update_world_client_ =
       node->create_client<UpdateWorldFile>(
-          "/sim/update_world_file");
+          "update_world");
   while (!update_world_client_->wait_for_service(1s)) {
     if (!rclcpp::ok()) {
       rclcpp::shutdown();
@@ -153,41 +153,49 @@ void PACStatusPanel::UpdateWorldFile() {
         output->append(
             "World file updated successfully");
       } else {
-        output->append("Filed to update world file");
+        std::string output_str = "<span style='color: red;'>";
+        output_str += request_response_pair.second->message;
+        output_str += "Failed to update world file";
+        output_str += "</span>";
+        output->append(QString::fromStdString(output_str));
       }
     };
   auto request =
       std::make_shared<UpdateWorldFile::Request>();
   request->file = idf_file_name_.toStdString();
+  request->namespaces = namespaces_;
   update_world_client_->async_send_request(
       request, std::move(update_world_file_cb));
 }
 
-void PACStatusPanel::GetWorldFile() {
-  using async_pac_gnn_interfaces::srv::WorldFile;
+void PACStatusPanel::GetSystemInfo() {
+  using async_pac_gnn_interfaces::srv::SystemInfo;
   using ServiceResponseFuture =
-      rclcpp::Client<WorldFile>::SharedFutureWithRequest;
+      rclcpp::Client<SystemInfo>::SharedFutureWithRequest;
   rclcpp::Node::SharedPtr node = node_ptr_->get_raw_node();
-  world_file_client_ =
-      node->create_client<async_pac_gnn_interfaces::srv::WorldFile>(
-          "/sim/get_world_file");
-  while (!world_file_client_->wait_for_service(1s)) {
+  system_info_client_ =
+      node->create_client<async_pac_gnn_interfaces::srv::SystemInfo>(
+          "get_system_info");
+  while (!system_info_client_->wait_for_service(1s)) {
     if (!rclcpp::ok()) {
       rclcpp::shutdown();
       return;
     }
+    RCLCPP_WARN(node->get_logger(), "waiting for get_system_info");
   }
   auto get_world_file_cb =
       [this](ServiceResponseFuture future) {
         auto request_response_pair = future.get();
-        idf_file_input_->setText(QString::fromStdString(request_response_pair.second->file));
-        idf_file_name_ = QString::fromStdString(request_response_pair.second->file);
+        auto response = request_response_pair.second;
+        idf_file_input_->setText(QString::fromStdString(response->idf_file));
+        idf_file_name_ = QString::fromStdString(response->idf_file);
+        namespaces_ = response->namespaces;
       };
 
   auto request =
-      std::make_shared<WorldFile::Request>();
+      std::make_shared<SystemInfo::Request>();
   request->name = "pac_rviz_panel";
-  world_file_client_->async_send_request(
+  system_info_client_->async_send_request(
       request, std::move(get_world_file_cb));
 
 }

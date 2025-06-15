@@ -41,7 +41,7 @@
 #include <QRadioButton>
 #include <QTextEdit>
 #include <async_pac_gnn_interfaces/srv/update_world_file.hpp>
-#include <async_pac_gnn_interfaces/srv/world_file.hpp>
+#include <async_pac_gnn_interfaces/srv/system_info.hpp>
 #include <rclcpp/executors/single_threaded_executor.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <rviz_common/panel.hpp>
@@ -56,7 +56,7 @@ class PACStatusPanel : public rviz_common::Panel {
   ~PACStatusPanel() override;
 
   void onInitialize() override;
-  void GetWorldFile();
+  void GetSystemInfo();
   void UpdateWorldFile();
 
  protected:
@@ -80,11 +80,12 @@ class PACStatusPanel : public rviz_common::Panel {
 
  private:
   int pac_status_ = 2;
+  std::vector<std::string> namespaces_;
   rclcpp::QoS qos_;
   rclcpp::Client<async_pac_gnn_interfaces::srv::UpdateWorldFile>::SharedPtr
       update_world_client_;
-  rclcpp::Client<async_pac_gnn_interfaces::srv::WorldFile>::SharedPtr
-      world_file_client_;
+  rclcpp::Client<async_pac_gnn_interfaces::srv::SystemInfo>::SharedPtr
+      system_info_client_;
   /* private Q_SLOTS: */
   /* void buttonActivated(); */
   /* int getRadioButtonStatus(); */
