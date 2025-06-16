@@ -144,7 +144,7 @@ void PACStatusPanel::UpdateWorldFile() {
       
   // Wait for action server
   if (!update_world_action_client_->wait_for_action_server(std::chrono::seconds(1))) {
-    output_text_->append("<span style='color: red;'>UpdateWorld action server not available</span>");
+    output_text_->append("<span style='color: red;'>UpdateWorld action server not available\n Run pac update_world</span>");
     return;
   }
   
