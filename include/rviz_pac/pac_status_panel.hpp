@@ -80,7 +80,6 @@ class PACStatusPanel : public rviz_common::Panel {
 
  private:
   int pac_status_ = 2;
-  std::vector<std::string> namespaces_;
   rclcpp::QoS qos_;
   rclcpp_action::Client<async_pac_gnn_interfaces::action::UpdateWorldFile>::SharedPtr
       update_world_action_client_;

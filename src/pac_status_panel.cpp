@@ -151,7 +151,6 @@ void PACStatusPanel::UpdateWorldFile() {
   // Create goal
   auto goal_msg = UpdateWorldFileAction::Goal();
   goal_msg.file = idf_file_name_.toStdString();
-  goal_msg.namespaces = namespaces_;
   
   output_text_->clear();
   output_text_->append("Sending update world request for: " + idf_file_name_);
@@ -235,7 +234,6 @@ void PACStatusPanel::GetSystemInfo() {
         auto response = request_response_pair.second;
         idf_file_input_->setText(QString::fromStdString(response->idf_file));
         idf_file_name_ = QString::fromStdString(response->idf_file);
-        namespaces_ = response->namespaces;
       };
 
   auto request =
