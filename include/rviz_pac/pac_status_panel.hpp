@@ -65,6 +65,8 @@ class PACStatusPanel : public rviz_common::Panel {
       node_ptr_;
   rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr publisher_;
   rclcpp::TimerBase::SharedPtr timer_;
+  rclcpp::TimerBase::SharedPtr timer_system_info_;
+  int system_info_status_ = 0;
 
   QLabel* label_;
   QRadioButton* radio_button_ready_;

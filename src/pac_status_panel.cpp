@@ -35,6 +35,7 @@
 /* Author: David V. Lu!! */
 
 #include <QVBoxLayout>
+#include <chrono>
 #include <rviz_common/display_context.hpp>
 #include <rviz_pac/pac_status_panel.hpp>
 using namespace std::chrono;
@@ -97,13 +98,14 @@ PACStatusPanel::PACStatusPanel(QWidget* parent) : Panel(parent), qos_(1) {
     }
   });
 
-  connect(idf_file_input_, &QLineEdit::editingFinished, this, [=]() {
-    idf_file_name_ = idf_file_input_->text();
-  });
+  connect(idf_file_input_, &QLineEdit::editingFinished, this,
+          [=]() { idf_file_name_ = idf_file_input_->text(); });
 
   connect(reset_button_, &QPushButton::clicked, this, [=]() {
     if (pac_status_ == 0) {
-      output_text_->append("<span style='color: red;'>Cannot reset world while PAC is ready.</span>");
+      output_text_->append(
+          "<span style='color: red;'>Cannot reset world while PAC is "
+          "ready.</span>");
       return;
     }
     output_text_->append("Resetting world to: " + idf_file_name_);
@@ -129,119 +131,135 @@ void PACStatusPanel::onInitialize() {
         msg.data = pac_status_;
         publisher_->publish(msg);
       });
-  GetSystemInfo();
+  timer_system_info_ =
+      node->create_wall_timer(std::chrono::milliseconds(500),
+                              std::bind(&PACStatusPanel::GetSystemInfo, this));
 }
 
 void PACStatusPanel::UpdateWorldFile() {
-  using UpdateWorldFileAction = async_pac_gnn_interfaces::action::UpdateWorldFile;
-  using GoalHandleUpdateWorldFile = rclcpp_action::ClientGoalHandle<UpdateWorldFileAction>;
-  
+  using UpdateWorldFileAction =
+      async_pac_gnn_interfaces::action::UpdateWorldFile;
+  using GoalHandleUpdateWorldFile =
+      rclcpp_action::ClientGoalHandle<UpdateWorldFileAction>;
+
   rclcpp::Node::SharedPtr node = node_ptr_->get_raw_node();
-  
+
   // Create action client
-  update_world_action_client_ = rclcpp_action::create_client<UpdateWorldFileAction>(
-      node, "update_world");
-      
+  update_world_action_client_ =
+      rclcpp_action::create_client<UpdateWorldFileAction>(node, "update_world");
+
   // Wait for action server
-  if (!update_world_action_client_->wait_for_action_server(std::chrono::seconds(1))) {
-    output_text_->append("<span style='color: red;'>UpdateWorld action server not available\n Run pac update_world</span>");
+  if (!update_world_action_client_->wait_for_action_server(
+          std::chrono::seconds(1))) {
+    output_text_->append(
+        "<span style='color: red;'>UpdateWorld action server not available\n "
+        "Run pac update_world</span>");
     return;
   }
-  
+
   // Create goal
   auto goal_msg = UpdateWorldFileAction::Goal();
   goal_msg.file = idf_file_name_.toStdString();
-  
+
   output_text_->clear();
   output_text_->append("Sending update world request for: " + idf_file_name_);
-  
+
   // Set up goal options with callbacks
-  auto send_goal_options = rclcpp_action::Client<UpdateWorldFileAction>::SendGoalOptions();
-  
+  auto send_goal_options =
+      rclcpp_action::Client<UpdateWorldFileAction>::SendGoalOptions();
+
   // Goal response callback
   send_goal_options.goal_response_callback =
-    [output = output_text_](const GoalHandleUpdateWorldFile::SharedPtr& goal_handle) {
-      if (!goal_handle) {
-        output->append("<span style='color: red;'>Goal was rejected by server</span>");
-      } else {
-        output->append("Goal accepted by server, processing...");
-      }
-    };
-    
+      [output = output_text_](
+          const GoalHandleUpdateWorldFile::SharedPtr& goal_handle) {
+        if (!goal_handle) {
+          output->append(
+              "<span style='color: red;'>Goal was rejected by server</span>");
+        } else {
+          output->append("Goal accepted by server, processing...");
+        }
+      };
+
   // Feedback callback
   send_goal_options.feedback_callback =
-    [output = output_text_](
-      GoalHandleUpdateWorldFile::SharedPtr,
-      const std::shared_ptr<const UpdateWorldFileAction::Feedback> feedback) {
-      QString progress = QString("%1/%2")
-                         .arg(feedback->robots_completed)
-                         .arg(feedback->robots_total);
-      output->append(progress);
-      
-      if (!feedback->message.empty()) {
-        output->append(QString::fromStdString(feedback->message));
-      }
-    };
-    
+      [output = output_text_](
+          GoalHandleUpdateWorldFile::SharedPtr,
+          const std::shared_ptr<const UpdateWorldFileAction::Feedback>
+              feedback) {
+        QString progress = QString("%1/%2")
+                               .arg(feedback->robots_completed)
+                               .arg(feedback->robots_total);
+        output->append(progress);
+
+        if (!feedback->message.empty()) {
+          output->append(QString::fromStdString(feedback->message));
+        }
+      };
+
   // Result callback
   send_goal_options.result_callback =
-    [output = output_text_](const GoalHandleUpdateWorldFile::WrappedResult& result) {
-      switch (result.code) {
-        case rclcpp_action::ResultCode::SUCCEEDED:
-          if (result.result->success) {
-            output->append("<span style='color: green;'>Complete</span>");
-          } else {
-            output->append("<span style='color: red;'>Failed</span>");
-            if (!result.result->message.empty()) {
-              output->append(QString::fromStdString(result.result->message));
+      [output = output_text_](
+          const GoalHandleUpdateWorldFile::WrappedResult& result) {
+        switch (result.code) {
+          case rclcpp_action::ResultCode::SUCCEEDED:
+            if (result.result->success) {
+              output->append("<span style='color: green;'>Complete</span>");
+            } else {
+              output->append("<span style='color: red;'>Failed</span>");
+              if (!result.result->message.empty()) {
+                output->append(QString::fromStdString(result.result->message));
+              }
             }
-          }
-          break;
-        case rclcpp_action::ResultCode::ABORTED:
-          output->append("<span style='color: red;'>Action was aborted</span>");
-          break;
-        case rclcpp_action::ResultCode::CANCELED:
-          output->append("<span style='color: red;'>Action was canceled</span>");
-          break;
-        default:
-          output->append("<span style='color: red;'>Unknown result code</span>");
-          break;
-      }
-    };
-  
+            break;
+          case rclcpp_action::ResultCode::ABORTED:
+            output->append(
+                "<span style='color: red;'>Action was aborted</span>");
+            break;
+          case rclcpp_action::ResultCode::CANCELED:
+            output->append(
+                "<span style='color: red;'>Action was canceled</span>");
+            break;
+          default:
+            output->append(
+                "<span style='color: red;'>Unknown result code</span>");
+            break;
+        }
+      };
+
   // Send goal
   update_world_action_client_->async_send_goal(goal_msg, send_goal_options);
 }
 
 void PACStatusPanel::GetSystemInfo() {
-  using async_pac_gnn_interfaces::srv::SystemInfo;
-  using ServiceResponseFuture =
-      rclcpp::Client<SystemInfo>::SharedFutureWithRequest;
-  rclcpp::Node::SharedPtr node = node_ptr_->get_raw_node();
-  system_info_client_ =
-      node->create_client<async_pac_gnn_interfaces::srv::SystemInfo>(
-          "get_system_info");
-  while (!system_info_client_->wait_for_service(1s)) {
-    if (!rclcpp::ok()) {
-      rclcpp::shutdown();
-      return;
-    }
-    RCLCPP_WARN(node->get_logger(), "waiting for get_system_info");
-  }
-  auto get_world_file_cb =
-      [this](ServiceResponseFuture future) {
+  if (system_info_status_ == 0) {
+    using async_pac_gnn_interfaces::srv::SystemInfo;
+    using ServiceResponseFuture =
+        rclcpp::Client<SystemInfo>::SharedFutureWithRequest;
+    rclcpp::Node::SharedPtr node = node_ptr_->get_raw_node();
+    system_info_client_ =
+        node->create_client<async_pac_gnn_interfaces::srv::SystemInfo>(
+            "get_system_info");
+    if (system_info_client_->wait_for_service(
+            std::chrono::milliseconds(100))) {
+      system_info_status_ = 1;
+      auto get_world_file_cb = [this](ServiceResponseFuture future) {
         auto request_response_pair = future.get();
         auto response = request_response_pair.second;
-        idf_file_input_->setText(QString::fromStdString(response->idf_file));
         idf_file_name_ = QString::fromStdString(response->idf_file);
+        system_info_status_ = 2;
       };
 
-  auto request =
-      std::make_shared<SystemInfo::Request>();
-  request->name = "pac_rviz_panel";
-  system_info_client_->async_send_request(
-      request, std::move(get_world_file_cb));
-
+      auto request = std::make_shared<SystemInfo::Request>();
+      request->name = "pac_rviz_panel";
+      system_info_client_->async_send_request(request,
+                                              std::move(get_world_file_cb));
+    }
+  }
+  if (system_info_status_ == 2) {
+    idf_file_input_->setText(idf_file_name_);
+    timer_system_info_->cancel();
+    timer_system_info_.reset();
+  }
 }
 }  // namespace rviz_pac
 
